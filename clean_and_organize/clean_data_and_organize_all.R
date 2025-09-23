@@ -54,7 +54,9 @@ observations <- data %>%
 
 # --- C) Écritures -----------------------------------------------------------
 write.csv(stations,     "stations.csv",     row.names = FALSE)
+print(paste("Fichier 'stations.csv' écrit avec", nrow(stations), "lignes et", ncol(stations), "colonnes."))
 write.csv(observations, "observations.csv", row.names = FALSE)
+print(paste("Fichier 'observations.csv' écrit avec", nrow(observations), "lignes et", ncol(observations), "colonnes."))
 
 # --- D) Checks rapides ------------------------------------------------------
 cat("Stations uniques     :", nrow(stations), "\n")
