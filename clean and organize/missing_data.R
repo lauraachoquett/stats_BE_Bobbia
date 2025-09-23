@@ -7,3 +7,4 @@ print(dim(data))  # Print the dimensions of the data frame
 missing_values <- colSums(is.na(data))
 cat("Total missing values in the dataset per column:\n")
 print(missing_values[missing_values > 0])
+print("hello")

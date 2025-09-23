@@ -1,7 +1,7 @@
 library(dplyr)
 
 # 0) Charger TOUTES les données (enlève nrows=10000)
-data <- read.csv("meteo.csv", sep = ";",nrows=1000)
+data <- read.csv("meteo.csv", sep = ";")
 
 # 1) Colonnes à retirer (parasites / doublons)
 cols_to_remove <- c(
