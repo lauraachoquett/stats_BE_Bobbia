@@ -3,7 +3,8 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import re
 
-CSV_PATH = "stations.csv"
+# CSV_PATH = "stations.csv"
+CSV_PATH = "data/stations.csv"
 REGIONS_URL = "https://france-geojson.gregoiredavid.fr/repo/regions.geojson"
 OM_CODES = {"01","02","03","04","06"}  # DOM à exclure
 

@@ -1,7 +1,7 @@
 library(dplyr)
 
 # Charger les données
-data <- read.csv("meteo.csv", sep = ";", nrows = 10000)
+data <- read.csv("data/meteo.csv", sep = ";", nrows = 10000)
 
 # 1) Colonnes à exclure (tu les avais déjà identifiées)
 cols_to_remove <- c(
@@ -37,8 +37,10 @@ station_7005_meta <- data %>%
   distinct()   # au cas où plusieurs lignes dupliquent les infos station
 
 # 5) Sauvegardes
-write.csv(station_7005_obs, "station_7005_obs.csv", row.names = FALSE)
-write.csv(station_7005_meta, "station_7005_meta.csv", row.names = FALSE)
+# write.csv(station_7005_obs, "station_7005_obs.csv", row.names = FALSE)
+# write.csv(station_7005_meta, "station_7005_meta.csv", row.names = FALSE)
+write.csv(station_7005_obs, "data/station_7005_obs.csv", row.names = FALSE)
+write.csv(station_7005_meta, "data/station_7005_meta.csv", row.names = FALSE)
 
 cat("Observations :", nrow(station_7005_obs), "lignes et", ncol(station_7005_obs), "colonnes\n")
 cat("Métadonnées  :", nrow(station_7005_meta), "lignes et", ncol(station_7005_meta), "colonnes\n")
