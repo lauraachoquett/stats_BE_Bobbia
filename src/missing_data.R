@@ -8,6 +8,16 @@ missing_values <- colSums(is.na(data))
 cat("Total missing values in the dataset per column:\n")
 print(missing_values[missing_values > 0])
 
+# Plot a missing data histogram (number of missing values per column) en .png but replace names of columns by their index
+png("missing_values_histogram.png", width = 800, height = 600)
+barplot(missing_values, main = "Missing Values per Column", 
+        xlab = "Columns", ylab = "Number of Missing Values", col = "blue", las = 2,
+        names.arg = seq_along(missing_values))
+# Rajouter une ligne horizontale pour indiquer un seuil de tolérance
+abline(h = 0.3 * nrow(data), col = "red", lty = 2)
+legend("topright", legend = "30% Threshold", col = "red", lty = 2)
+dev.off()
+
 # Function to drop columns with more than a specified threshold of missing values
 drop_columns_with_missing <- function(data, missing_values, threshold_ratio = 0.3) {
     threshold <- threshold_ratio * nrow(data)
