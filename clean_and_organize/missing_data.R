@@ -8,11 +8,17 @@ missing_values <- colSums(is.na(data))
 cat("Total missing values in the dataset per column:\n")
 print(missing_values[missing_values > 0])
 
-# Drop the columns if there is more than 30% of missing values
-threshold <-  0.3 * nrow(data)
-cols_to_drop <- names(missing_values[missing_values > threshold])
-data_cleaned <- data[, !(names(data) %in% cols_to_drop)]
-cat("Dropped columns with more than 30% missing values:\n")
+# Function to drop columns with more than a specified threshold of missing values
+drop_columns_with_missing <- function(data, missing_values, threshold_ratio = 0.3) {
+    threshold <- threshold_ratio * nrow(data)
+    cols_to_drop <- names(missing_values[missing_values > threshold])
+    data_cleaned <- data[, !(names(data) %in% cols_to_drop)]
+    cat("Dropped columns with more than", threshold_ratio * 100, "% missing values:\n")
+    print(cols_to_drop)
+    # Save the cleaned data to a new CSV file
+    write.csv(data_cleaned, "observations_cleaned.csv", row.names = FALSE)
+    return(data_cleaned)
+}
 
-
-write.csv(data_cleaned, "observations_cleaned.csv", row.names = FALSE)
+# Example usage:
+# data_cleaned <- drop_columns_with_missing(data, missing_values)
