@@ -21,4 +21,4 @@ drop_columns_with_missing <- function(data, missing_values, threshold_ratio = 0.
 }
 
 # Example usage:
-# data_cleaned <- drop_columns_with_missing(data, missing_values)
+data_cleaned <- drop_columns_with_missing(data, missing_values)
