@@ -15,6 +15,6 @@ boxplot_column <- function(data, column_name, output_file) {
 
 if (sys.nframe() == 0) {
     # This block runs if the script is executed directly (like 'main')
-    data <- load_data("observations.csv")
-    boxplot_column(data, "Pression.au.niveau.mer", "boxplot_pression_mer.png")
+    data <- load_data("csv/observations.csv")
+    boxplot_column(data, "Pression.au.niveau.mer", "fig/boxplot_pression_mer.png")
 }
