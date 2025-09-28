@@ -1,6 +1,6 @@
 #  Load the CSV file into a data frame and choosing how many rows and columns
 
-data <- read.csv("observations.csv", header = TRUE, sep = ",")
+data <- read.csv("data/observations.csv", header = TRUE, sep = ",")
 print(dim(data))  # Print the dimensions of the data frame
 
 # Check for missing values in the dataset per column and get a the missing values per column
