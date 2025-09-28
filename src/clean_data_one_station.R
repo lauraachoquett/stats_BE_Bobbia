@@ -1,44 +1,66 @@
+#!/usr/bin/env Rscript
+
 library(dplyr)
 
-# Charger les données
-data <- read.csv("meteo.csv", sep = ";", nrows = 10000)
+extract_station <- function(file_path, station_id, out_dir = "csv") {
+  # Lecture
+  data <- read.csv(file_path, sep = ";")
+  
+  # Colonnes à exclure
+  cols_to_remove <- c(
+    "Type.de.tendance.barométrique.1",
+    "Temps.passé.1.1",
+    "Temps.présent.1",
+    "Phénomène.spécial.1",
+    "Phénomène.spécial.2",
+    "Phénomène.spécial.3",
+    "Coordonnees",
+    "Nom",
+    "Température...C."
+  )
+  
+  # Colonnes station
+  station_cols <- c(
+    "ID.OMM.station", "Latitude", "Longitude", "Altitude",
+    "communes..name.", "communes..code.", "EPCI..name.", "EPCI..code.",
+    "department..name.", "department..code.", "region..name.", "region..code."
+  )
+  
+  # Observations
+  station_obs <- data %>%
+    filter(ID.OMM.station == station_id) %>%
+    select(-any_of(cols_to_remove)) %>%
+    select(-all_of(intersect(names(.), station_cols[-1])))
+  
+  # Métadonnées
+  station_meta <- data %>%
+    filter(ID.OMM.station == station_id) %>%
+    select(all_of(intersect(names(.), station_cols))) %>%
+    distinct()
+  
+  # Fichiers de sortie (automatiques)
+  out_obs <- file.path(out_dir, paste0("station_", station_id, "_obs.csv"))
+  out_station <- file.path(out_dir, paste0("station_", station_id, "_station.csv"))
+  
+  write.csv(station_obs, out_obs, row.names = FALSE)
+  write.csv(station_meta, out_station, row.names = FALSE)
+  
+  cat("Station", station_id, "\n")
+  cat("Observations :", nrow(station_obs), "lignes et", ncol(station_obs), "colonnes →", out_obs, "\n")
+  cat("Métadonnées  :", nrow(station_meta), "lignes et", ncol(station_meta), "colonnes →", out_station, "\n")
+}
 
-# 1) Colonnes à exclure (tu les avais déjà identifiées)
-cols_to_remove <- c(
-  "Type.de.tendance.barométrique.1",
-  "Temps.passé.1.1",
-  "Temps.présent.1",
-  "Phénomène.spécial.1",
-  "Phénomène.spécial.2",
-  "Phénomène.spécial.3",
-  "Coordonnees",
-  "Nom"
-)
+# --- Partie exécutable ---
+args <- commandArgs(trailingOnly = TRUE)
 
-# 2) Colonnes "station" à mettre dans une base séparée
-station_cols <- c(
-  "ID.OMM.station", "Latitude", "Longitude", "Altitude",
-  "communes..name.", "communes..code.", "EPCI..name.", "EPCI..code.",
-  "department..name.", "department..code.", "region..name.", "region..code."
-)
+if (length(args) < 1) {
+  stop("Usage: Rscript extract_station.R <station_id>")
+}
 
-# 3) Base filtrée pour la station 7005 (observations)
-station_7005_obs <- data %>%
-  filter(ID.OMM.station == 7005) %>%
-  select(-all_of(cols_to_remove)) %>%
-  select(-all_of(setdiff(
-    intersect(names(.), station_cols[-1]),
-    c("Latitude", "Longitude", "Altitude")
-  )))
-# 4) Base métadonnées pour la station 7005
-station_7005_meta <- data %>%
-  filter(ID.OMM.station == 7005) %>%
-  select(all_of(intersect(names(.), station_cols))) %>%
-  distinct()   # au cas où plusieurs lignes dupliquent les infos station
+station_id <- as.integer(args[1])
 
-# 5) Sauvegardes
-write.csv(station_7005_obs, "station_7005_obs.csv", row.names = FALSE)
-write.csv(station_7005_meta, "station_7005_meta.csv", row.names = FALSE)
+# fichier source fixe + dossier sortie
+file_path <- "csv/meteo.csv"
+out_dir <- "csv"
 
-cat("Observations :", nrow(station_7005_obs), "lignes et", ncol(station_7005_obs), "colonnes\n")
-cat("Métadonnées  :", nrow(station_7005_meta), "lignes et", ncol(station_7005_meta), "colonnes\n")
+extract_station(file_path, station_id, out_dir)
