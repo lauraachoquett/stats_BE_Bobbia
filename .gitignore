@@ -2,3 +2,7 @@
 *.png
 *.RData
 *.Rhistory
+.vscode/
+*.pdf
+*.rds
+*.txt
