@@ -2,7 +2,7 @@
 
 library(dplyr)
 
-extract_station <- function(file_path, station_id, out_dir = "csv") {
+extract_station <- function(file_path, station_id, out_dir = "data") {
   # Lecture
   data <- read.csv(file_path, sep = ";")
   
@@ -60,7 +60,7 @@ if (length(args) < 1) {
 station_id <- as.integer(args[1])
 
 # fichier source fixe + dossier sortie
-file_path <- "csv/meteo.csv"
-out_dir <- "csv"
+file_path <- "data/meteo.csv"
+out_dir <- "data"
 
 extract_station(file_path, station_id, out_dir)
