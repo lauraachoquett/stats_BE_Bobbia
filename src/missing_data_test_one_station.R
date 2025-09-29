@@ -1,6 +1,6 @@
 # 1) Lecture (ok) – on capte déjà pas mal de cas
 data <- read.csv(
-  "csv/station_7005_obs.csv",
+  "csv/station_7591_obs.csv",
   header = TRUE,
   sep = ",",
   na.strings = c("NA", "NaN", "", " ", "-", "None", "NULL", "N/A")
@@ -37,4 +37,4 @@ data_cleaned <- data[, !(names(data) %in% cols_to_drop), drop = FALSE]
 cat("\nColonnes supprimées (>30% NA):\n"); print(cols_to_drop)
 
 # 6) Sauvegarde
-write.csv(data_cleaned, "csv/station_7005_obs_cleaned.csv", row.names = FALSE)
+write.csv(data_cleaned, "csv/station_7591_obs_cleaned.csv", row.names = FALSE)
