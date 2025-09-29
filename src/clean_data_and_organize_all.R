@@ -1,8 +1,7 @@
 library(dplyr)
 
 # 0) Charger TOUTES les données (enlève nrows=10000)
-# data <- read.csv("meteo.csv", sep = ";")
-data <- read.csv("data/meteo.csv", sep = ";")
+data <- read.csv("csv/meteo.csv", sep = ";")
 
 # 1) Colonnes à retirer (parasites / doublons)
 cols_to_remove <- c(
@@ -13,7 +12,8 @@ cols_to_remove <- c(
   "Phénomène.spécial.2",
   "Phénomène.spécial.3",
   "Coordonnees",
-  "Nom"
+  "Nom",
+  "Température...C."
 )
 
 # 2) Colonnes "station" (métadonnées fixes par station)
@@ -44,7 +44,7 @@ stations <- data %>%
 
 # --- B) Table OBSERVATIONS (toutes les mesures) ----------------------------
 # On garde ID + Lat/Lon/Alt dans les observations; on enlève le reste des métadonnées station
-keep_in_obs <- intersect(names(data), c("ID.OMM.station", "Latitude", "Longitude", "Altitude"))
+keep_in_obs <- intersect(names(data), c("ID.OMM.station"))
 drop_from_obs <- setdiff(station_cols_present, keep_in_obs)
 
 observations <- data %>%
