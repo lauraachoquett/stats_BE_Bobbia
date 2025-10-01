@@ -8,7 +8,6 @@ afd_with_season_plots <- function(file_path,
                                   seed = 123,
                                   output_dir = NULL,
                                   prefix = "afd_") {
-  # --- Packages ---
   stopifnot(requireNamespace("dplyr", quietly = TRUE),
             requireNamespace("ggplot2", quietly = TRUE),
             requireNamespace("lubridate", quietly = TRUE),
@@ -21,7 +20,6 @@ afd_with_season_plots <- function(file_path,
   library(grid) # unit()
   has_ggdendro <- requireNamespace("ggdendro", quietly = TRUE)
 
-  # --- Lecture & nettoyage minimal ---
   data <- read.csv(
     file_path,
     sep = ",", header = TRUE,
@@ -29,7 +27,6 @@ afd_with_season_plots <- function(file_path,
     strip.white = TRUE
   )
 
-  # --- Dates & saison (classes) ---
   data <- data %>%
     mutate(Date = ymd_hms(Date)) %>%
     mutate(mois = month(Date),
@@ -44,11 +41,9 @@ afd_with_season_plots <- function(file_path,
 
   data <- data %>%
     filter(nchar(as.character(ID.OMM.station)) == 4 & grepl("^[0-9]+$", ID.OMM.station))
-  # --- Matrice numérique : imputation moyenne + retrait des constantes (compatible toutes versions de dplyr) ---
   tmp <- data %>%
     dplyr::select(-dplyr::any_of(cols_to_remove))
 
-  # Imputation moyenne seulement pour les colonnes numériques
   tmp[] <- lapply(tmp, function(x) {
     if (is.numeric(x)) {
       m <- mean(x, na.rm = TRUE)
@@ -57,7 +52,6 @@ afd_with_season_plots <- function(file_path,
     x
   })
 
-  # Garder uniquement les colonnes numériques à variance > 0
   keep <- sapply(tmp, function(x) {
     is.numeric(x) && is.finite(stats::var(x, na.rm = TRUE)) && stats::var(x, na.rm = TRUE) > 0
   })
@@ -68,13 +62,10 @@ afd_with_season_plots <- function(file_path,
   stopifnot(nlevels(y) >= 2)
 
 
-  # --- AFD / LDA ---
-  # On standardise souvent avant LDA si les échelles diffèrent fortement
   Xs <- scale(X)
   lda_fit <- lda(x = Xs, grouping = y)
 
-  # --- Scree plot des LD (à partir de lda$svd) ---
-  eigvals <- lda_fit$svd^2                   # valeurs propres des LD
+  eigvals <- lda_fit$svd^2                  
   var_exp_pct <- eigvals / sum(eigvals)
   scree_df <- data.frame(
     LD = factor(paste0("LD", seq_along(eigvals)),
@@ -88,7 +79,6 @@ afd_with_season_plots <- function(file_path,
     theme_minimal() +
     labs(title = "Scree plot (AFD)", x = "Axes discriminants", y = "% variance discriminante")
 
-  # --- "Loadings" (coefficients) LD1/LD2 pour les variables ---
   loadings <- as.matrix(lda_fit$scaling)
   k_axes <- min(2, ncol(loadings))
   loadings12 <- loadings[, 1:k_axes, drop = FALSE]
@@ -97,7 +87,6 @@ afd_with_season_plots <- function(file_path,
   loadings_df <- as.data.frame(loadings12)
   loadings_df$var <- rownames(loadings_df)
 
-  # --- Clustering des variables sur (LD1,LD2) ---
   if (k_axes < 2) {
     warning("Il n'y a qu'un seul axe discriminant (niveaux de classe - 1). Les graphiques 2D utiliseront LD1 et un axe nul.")
     loadings_df$LD2 <- 0
@@ -118,7 +107,6 @@ afd_with_season_plots <- function(file_path,
       .groups = "drop"
     )
 
-  # --- Dendrogramme (si ggdendro dispo) ---
   p_dendro <- NULL
   if (has_ggdendro) {
     dend <- ggdendro::dendro_data(hc, type = "rectangle")
@@ -135,20 +123,17 @@ afd_with_season_plots <- function(file_path,
            x = NULL, y = "Hauteur")
   }
 
-  # --- Scores des observations sur LD1/LD2 ---
   pred <- predict(lda_fit, Xs)
   scores <- as.data.frame(pred$x[, 1:k_axes, drop = FALSE])
   if (k_axes == 1) scores$LD2 <- 0
   names(scores)[1:2] <- c("LD1","LD2")
   scores$saison <- y
 
-  # --- Échantillonnage pour lisibilité ---
   set.seed(seed)
   n_echantillon <- min(sample_max, nrow(scores))
   idx <- sample(nrow(scores), n_echantillon)
   scores_sample <- scores[idx, , drop = FALSE]
 
-  # --- Palette saison ---
   pal_saison <- c(
     "Hiver" = "#3498db",
     "Printemps" = "#2ecc71",
@@ -156,12 +141,10 @@ afd_with_season_plots <- function(file_path,
     "Automne" = "#f39c12"
   )
 
-  # --- Scatter global LD1–LD2 ---
   p_all <- ggplot() +
     geom_point(data = scores_sample,
                aes(x = LD1, y = LD2, color = saison),
                alpha = 0.3, size = 0.8) +
-    # Flèches vers les centroïdes des groupes de variables (dans l'espace des coefficients LD)
     geom_segment(data = centroides,
                  aes(x = 0, y = 0, xend = LD1 * scale_factor, yend = LD2 * scale_factor),
                  arrow = arrow(length = unit(0.3, "cm")),
@@ -182,7 +165,6 @@ afd_with_season_plots <- function(file_path,
     geom_vline(xintercept = 0, linetype = "dashed", color = "grey70") +
     theme(legend.position = "right")
 
-  # --- Un plot par saison (palette globale conservée) ---
   saisons_ord <- c("Hiver","Printemps","Été","Automne")
   plots_saison <- lapply(saisons_ord, function(s) {
     df_s <- scores_sample %>% dplyr::filter(saison == s)
@@ -214,9 +196,6 @@ afd_with_season_plots <- function(file_path,
   })
   names(plots_saison) <- saisons_ord
 
-  # --- Carte des coefficients (analogue au "cercle") ---
-  # En LDA les coefficients ne sont pas bornés comme des corrélations ;
-  # on les affiche tels quels + regroupements.
   p_coeffs <- ggplot() +
     geom_segment(data = loadings_df,
                  aes(x = 0, y = 0, xend = LD1, yend = LD2, color = groupe),
@@ -237,19 +216,10 @@ afd_with_season_plots <- function(file_path,
     geom_vline(xintercept = 0, linetype = "dashed", color = "grey70") +
     theme(legend.position = "none")
 
-  # --- Impression console des groupes ---
-  out_file <- file.path(output_dir, paste0(prefix, "groups_afd.txt"))
 
-  capture.output({
-    cat("\n=== Détail des groupes ===\n")
-    for (g in unique(groupes)) {
-      cat("\nGroupe", g, ":\n")
-      vars_g <- loadings_df$var[loadings_df$groupe == g]
-      cat(paste(vars_g, collapse = "\n"), "\n")
-    }
-  }, file = out_file)
 
-  # --- Sauvegardes si demandé ---
+
+
   if (!is.null(output_dir)) {
     if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
     ggsave(file.path(output_dir, paste0(prefix, "scree.png")), p_scree, width = 8, height = 6, dpi = 150)
@@ -262,7 +232,6 @@ afd_with_season_plots <- function(file_path,
       ggsave(file.path(output_dir, paste0(prefix, "projection_", s, ".png")),
              plots_saison[[s]], width = 10, height = 7, dpi = 150)
     }
-    # CSV des centroides/groupes
     if (requireNamespace("readr", quietly = TRUE)) {
       readr::write_csv(centroides, file.path(output_dir, paste0(prefix, "groupes_centroides.csv")))
     } else {
@@ -270,7 +239,6 @@ afd_with_season_plots <- function(file_path,
     }
   }
 
-  # --- Retour ---
   list(
     lda = lda_fit,
     variance_ld1_ld2 = var_exp_pct[1:min(2, length(var_exp_pct))],
@@ -287,31 +255,30 @@ afd_with_season_plots <- function(file_path,
   )
 }
 
-# Définir l'ID de la station
 id <- 'global'
 
-# Construire le chemin et le préfixe dynamiquement
-file_path   <- paste0("csv/observations_cleaned.csv")
-output_dir  <- paste0("fig/", id, "/")
-prefix      <- paste0("afd_", id, "_")
+# # Construire le chemin et le préfixe dynamiquement
+# file_path   <- paste0("csv/observations_cleaned.csv")
+# output_dir  <- paste0("fig/", id, "/")
+# prefix      <- paste0("afd_", id, "_")
 
-# Appel de la fonction
-res_afd <- afd_with_season_plots(
-  file_path      = file_path,
-  seuil_distance = 0.2,
-  output_dir     = output_dir,      
-  prefix         = prefix
-)
+# # Appel de la fonction
+# res_afd <- afd_with_season_plots(
+#   file_path      = file_path,
+#   seuil_distance = 0.2,
+#   output_dir     = output_dir,      
+#   prefix         = prefix
+# )
 
-# Afficher les graphiques
-res_afd$plots$scree
-res_afd$plots$all_seasons
-res_afd$plots$coefficients
-res_afd$plots$dendrogram  # peut être NULL si ggdendro non installé
-res_afd$plots$by_season$Hiver
-res_afd$plots$by_season$Printemps
-res_afd$plots$by_season$`Été`
-res_afd$plots$by_season$Automne
+# # Afficher les graphiques
+# res_afd$plots$scree
+# res_afd$plots$all_seasons
+# res_afd$plots$coefficients
+# res_afd$plots$dendrogram  # peut être NULL si ggdendro non installé
+# res_afd$plots$by_season$Hiver
+# res_afd$plots$by_season$Printemps
+# res_afd$plots$by_season$`Été`
+# res_afd$plots$by_season$Automne
 
-# Groupes de variables
-res_afd$groupes
+# # Groupes de variables
+# res_afd$groupes

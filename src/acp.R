@@ -92,17 +92,6 @@ data <- data %>%
   plot(hc, main = "Dendrogramme des variables")
   abline(h = seuil_distance, col = "red", lty = 2)
 
-out_file <- file.path(output_dir, paste0(prefix, "groups_acp.txt"))
-
-capture.output({
-  cat("\n=== Détail des groupes ===\n")
-  for (g in unique(groupes)) {
-    cat("\nGroupe", g, ":\n")
-    vars_g <- loadings_df$var[loadings_df$groupe == g]
-    cat(paste(vars_g, collapse = "\n"), "\n")
-  }
-}, file = out_file)
-
   # --- Scores des observations (PC1/PC2) ---
   scores <- as.data.frame(acp$x[, 1:2, drop = FALSE])
   names(scores) <- c("PC1","PC2")
@@ -121,6 +110,7 @@ capture.output({
     "Été" = "#e74c3c",
     "Automne" = "#f39c12"
   )
+
 
   # --- Plot global (toutes saisons) ---
   p_all <- ggplot() +
@@ -205,6 +195,7 @@ capture.output({
     geom_vline(xintercept = 0, linetype = "dashed", color = "grey70") +
     theme(legend.position = "none")
 
+
   # --- Sauvegardes si demandé ---
   if (!is.null(output_dir)) {
     if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
@@ -233,30 +224,31 @@ capture.output({
       all_seasons = p_all,
       by_season = plots_saison,
       circle = p_circle
+      dendo =dendo,
     )
   )
 }
 
-# Définir l'ID de la station
-id <- 7690
+# # Définir l'ID de la station
+# id <- 7690
 
-# Construire le chemin et le préfixe dynamiquement
-file_path   <- paste0("csv/station_", id, "_obs_cleaned.csv")
-output_dir  <- paste0("fig/", id, "/")
-prefix      <- paste0("acp_", id, "_")
+# # Construire le chemin et le préfixe dynamiquement
+# file_path   <- paste0("csv/station_", id, "_obs_cleaned.csv")
+# output_dir  <- paste0("fig/", id, "/")
+# prefix      <- paste0("acp_", id, "_")
 
-# Appel de la fonction
-res <- pca_with_season_plots(
-  file_path      = file_path,
-  seuil_distance = 0.2,
-  output_dir     = output_dir,      
-  prefix         = prefix
-)
-# Afficher les graphiques dans R
-res$plots$scree
-res$plots$all_seasons
-res$plots$circle
-res$plots$by_season$Hiver
-res$plots$by_season$Printemps
-res$plots$by_season$`Été`
-res$plots$by_season$Automne
+# # Appel de la fonction
+# res <- pca_with_season_plots(
+#   file_path      = file_path,
+#   seuil_distance = 0.2,
+#   output_dir     = output_dir,      
+#   prefix         = prefix
+# )
+# # Afficher les graphiques dans R
+# res$plots$scree
+# res$plots$all_seasons
+# res$plots$circle
+# res$plots$by_season$Hiver
+# res$plots$by_season$Printemps
+# res$plots$by_season$`Été`
+# res$plots$by_season$Automne

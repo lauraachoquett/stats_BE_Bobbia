@@ -141,11 +141,14 @@ def heatmap_points_from_observations(stations_csv, observations_csv, var_col,
     gdf_in.plot(
         ax=ax,
         column=value_col,
-        cmap="coolwarm",          # bleu -> rouge
+        cmap="coolwarm",
         markersize=sizes,
         alpha=0.9,
         legend=True,
-        legend_kwds={"label": f"Moyenne de {var_col}"}
+        legend_kwds={
+            "label": f"Moyenne de {var_col}",
+            "shrink": 0.4        # taille globale de la colorbar (réduction)
+        }
     )
 
     # Petites annotations lisibles si peu de points
@@ -169,5 +172,5 @@ if __name__ == "__main__":
     observations_csv = "csv/observations_cleaned.csv"  # (toutes les mesures)
     heatmap_points_from_observations(
         stations_csv, observations_csv,
-        var_col="Hauteur.totale.de.la.couche.de.neige..glace..autre.au.sol"  # mets ici le nom attendu côté observations
+        var_col="Précipitations.dans.les.24.dernières.heures"  # mets ici le nom attendu côté observations
     )
