@@ -1,7 +1,8 @@
 library(dplyr)
 
+
 # 0) Charger TOUTES les données (enlève nrows=10000)
-data <- read.csv("csv/meteo.csv", sep = ";")
+data <- read.csv("./csv/meteo.csv", sep = ";")
 
 # 1) Colonnes à retirer (parasites / doublons)
 cols_to_remove <- c(
@@ -54,9 +55,9 @@ observations <- data %>%
   select(-all_of(drop_from_obs))
 
 # --- C) Écritures -----------------------------------------------------------
-write.csv(stations,     "data/stations.csv",     row.names = FALSE)
+write.csv(stations,     "./csv/stations.csv",     row.names = FALSE)
 print(paste("Fichier 'stations.csv' écrit avec", nrow(stations), "lignes et", ncol(stations), "colonnes."))
-write.csv(observations, "data/observations.csv", row.names = FALSE)
+write.csv(observations, "./csv/observations.csv", row.names = FALSE)
 print(paste("Fichier 'observations.csv' écrit avec", nrow(observations), "lignes et", ncol(observations), "colonnes."))
 
 # --- D) Checks rapides ------------------------------------------------------
