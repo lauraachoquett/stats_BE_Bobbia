@@ -1,7 +1,7 @@
 library(dplyr)
 library(ggplot2)
 
-plot_monthly_avg <- function(data, station_id, variable) {
+plot_over_months_by_station <- function(data, station_id, variable) {
   # Vérification que la colonne Date est bien en format datetime
   if (!inherits(data$Date, "POSIXct") && !inherits(data$Date, "Date")) {
     data$Date <- as.POSIXct(data$Date, tz = "UTC")

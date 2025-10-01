@@ -1,4 +1,4 @@
-# Load the CSV file into a data frame and choosing how many rows and columns
+#  Load the CSV file into a data frame and choosing how many rows and columns
 
 data <- read.csv("csv/observations.csv", header = TRUE, sep = ",")
 print(dim(data))  # Print the dimensions of the data frame
