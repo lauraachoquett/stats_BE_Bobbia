@@ -238,12 +238,16 @@ afd_with_season_plots <- function(file_path,
     theme(legend.position = "none")
 
   # --- Impression console des groupes ---
-  cat("\n=== Groupes de variables (clustering sur coefficients LDA) ===\n")
-  for (g in sort(unique(loadings_df$groupe))) {
-    cat("\nGroupe", g, "(n =", sum(loadings_df$groupe == g), "):\n")
-    vars_g <- loadings_df$var[loadings_df$groupe == g]
-    cat(paste(vars_g, collapse = ", "), "\n")
-  }
+  out_file <- file.path(output_dir, paste0(prefix, "groups_afd.txt"))
+
+  capture.output({
+    cat("\n=== Détail des groupes ===\n")
+    for (g in unique(groupes)) {
+      cat("\nGroupe", g, ":\n")
+      vars_g <- loadings_df$var[loadings_df$groupe == g]
+      cat(paste(vars_g, collapse = "\n"), "\n")
+    }
+  }, file = out_file)
 
   # --- Sauvegardes si demandé ---
   if (!is.null(output_dir)) {
@@ -283,11 +287,20 @@ afd_with_season_plots <- function(file_path,
   )
 }
 
+# Définir l'ID de la station
+id <- 7591
+
+# Construire le chemin et le préfixe dynamiquement
+file_path   <- paste0("csv/station_", id, "_obs_cleaned.csv")
+output_dir  <- paste0("fig/", id, "/")
+prefix      <- paste0("afd_", id, "_")
+
+# Appel de la fonction
 res_afd <- afd_with_season_plots(
-  file_path = "csv/observations_cleaned.csv",
+  file_path      = file_path,
   seuil_distance = 0.2,
-  output_dir = "fig",
-  prefix = "adf_global_"
+  output_dir     = output_dir,      
+  prefix         = prefix
 )
 
 # Afficher les graphiques

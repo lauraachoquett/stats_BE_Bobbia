@@ -1,4 +1,5 @@
-pca_with_season_plots <- function(file_path,
+pca_with_season_plots <- function(
+                                  file_path,
                                   cols_to_remove = c("Date","ID.OMM.station","mois_de_l_annee",
                                                      "Temps.présent","Type.de.tendance.barométrique",
                                                      "Periode.de.mesure.de.la.rafale","mois"),
@@ -91,7 +92,7 @@ data <- data %>%
   plot(hc, main = "Dendrogramme des variables")
   abline(h = seuil_distance, col = "red", lty = 2)
 
-out_file <- paste0(prefix, "groupes.txt")
+out_file <- file.path(output_dir, paste0(prefix, "groups_acp.txt"))
 
 capture.output({
   cat("\n=== Détail des groupes ===\n")
@@ -236,13 +237,21 @@ capture.output({
   )
 }
 
-res <- pca_with_season_plots(
-  file_path = "csv/observations_cleaned.csv",
-  seuil_distance = 0.2,
-  output_dir = "fig",      # ou NULL pour ne pas sauvegarder
-  prefix = "acp_global_"
-)
+# Définir l'ID de la station
+id <- 7690
 
+# Construire le chemin et le préfixe dynamiquement
+file_path   <- paste0("csv/station_", id, "_obs_cleaned.csv")
+output_dir  <- paste0("fig/", id, "/")
+prefix      <- paste0("acp_", id, "_")
+
+# Appel de la fonction
+res <- pca_with_season_plots(
+  file_path      = file_path,
+  seuil_distance = 0.2,
+  output_dir     = output_dir,      
+  prefix         = prefix
+)
 # Afficher les graphiques dans R
 res$plots$scree
 res$plots$all_seasons
