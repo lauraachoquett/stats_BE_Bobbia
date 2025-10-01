@@ -288,10 +288,10 @@ afd_with_season_plots <- function(file_path,
 }
 
 # Définir l'ID de la station
-id <- 7591
+id <- 'global'
 
 # Construire le chemin et le préfixe dynamiquement
-file_path   <- paste0("csv/station_", id, "_obs_cleaned.csv")
+file_path   <- paste0("csv/observations_cleaned.csv")
 output_dir  <- paste0("fig/", id, "/")
 prefix      <- paste0("afd_", id, "_")
 
